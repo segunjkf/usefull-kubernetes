@@ -1,0 +1,27 @@
+master_ip=$(aws ec2 describe-instances --region us-west-2 \
+ --filters "Name=tag:Name,Values=k8s-master" \
+ --query "Reservations[*].Instances[*].PrivateIpAddress" \
+ --output text)  # get the master's IP address using the AWS CLI
+
+ openssl req -new -key certs/andy.key -out certs/andy.csr -subj "/CN=andy/O=network-admin"
+ kubectl get csr new-user-request -o jsonpath='{.status.certificate}' \
+
+ kubectl get csr new-user-request -o jsonpath='{.status.certificate}' \
+  | base64 --decode > keys/andy.crt
+
+  kubectl config set-credentials andy \
+  --client-certificate=keys/andy.crt \
+  --client-key=keys/andy.key \
+  --embed-certs
+# creating network admin
+  kubectl config set-context network-admin --cluster=kubernetes --user=andy
+
+  kubectl config use-context network-admin
+
+ Send an authenticated request to the secure API server endpoint:
+  api_endpoint=$(kubectl get endpoints kubernetes | tail -1 | awk '{print "https://" $2}')
+sudo curl \
+  --cacert /etc/kubernetes/pki/ca.crt \
+  --cert /etc/kubernetes/pki/apiserver-kubelet-client.crt \
+  --key /etc/kubernetes/pki/apiserver-kubelet-client.key \
+  $api_endpoint

@@ -1,0 +1,38 @@
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+
+# Add Docker’s GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+# Configure the stable Docker release repository
+sudo add-apt-repository \
+ "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+ $(lsb_release -cs) \
+ stable"
+# Update the package index to include the stable Docker repository
+sudo apt-get update
+# Install Docker
+
+
+# Add the Google Cloud packages GPG key
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+# Add the Kubernetes release repository
+sudo add-apt-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+# Update the package index to include the Kubernetes repository
+sudo apt-get update
+# Install the packages
+sudo apt-get install -y kubeadm=1.13.4-00 kubelet=1.13.4-00 kubectl=1.13.4-00 kubernetes-cni=0.6.0-00
+# Prevent automatic updates to the installed packages
+sudo apt-mark hold kubelet kubeadm kubectl
+
+
+Initialize the master node using the init command
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13
+
+will be displayed at the end of your cluster
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+weevework network plugin
+
+kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+kubectl apply -f "gitnet?k8s-version=$(kubectl version | base64 | tr -d '\n')&env.IPALLOC_RANGE=192.168.0.0/16"
