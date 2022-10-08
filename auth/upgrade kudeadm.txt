@@ -1,0 +1,26 @@
+# Update the kubeadm binary with version 1.14.1
+sudo curl -sSL https://dl.k8s.io/release/v1.14.1/bin/linux/amd64/kubeadm -o /usr/bin/kubeadm
+
+now plan the upgrade to the version you want to upgrade too 
+
+sudo kubeadm upgrade plan v1.14.1
+
+#masternode kubectl as to be update manually 
+kubectl drain $HOSTNAME --ignore-daemonsets
+
+sudo apt-get update
+sudo apt-get upgrade -y --allow-change-held-packages \
+     kubelet=1.14.1-00 kubeadm=1.14.1-00 kubectl=1.14.1-00 kubernetes-cni=0.7.5-00
+
+     kubectl uncordon $HOSTNAME
+
+
+# Get the worker's name
+worker_name=$(kubectl get nodes | grep \<none\> | cut -d' ' -f1)
+# Drain the worker node
+kubectl drain $worker_name --ignore-daemonsets
+
+Upgrade the worker node's kubelet config using kubeadm:
+sudo kubeadm upgrade node config --kubelet-version v1.14.1
+
+kubectl get nodes

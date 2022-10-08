@@ -10,6 +10,7 @@ sudo add-apt-repository \
 # Update the package index to include the stable Docker repository
 sudo apt-get update
 # Install Docker
+sudo apt-get install -y docker-ce=17.03.2~ce-0~ubuntu-xenial
 
 
 # Add the Google Cloud packages GPG key
@@ -35,4 +36,21 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 weevework network plugin
 
 kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
-kubectl apply -f "gitnet?k8s-version=$(kubectl version | base64 | tr -d '\n')&env.IPALLOC_RANGE=192.168.0.0/16"
+kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s-1.11.yaml
+
+
+always back up the cluster's certificate authority key (/etc/kubernetes/pki/ca.key)
+ and certificate (/etc/kubernetes/pki/ca.crt). You should do that after the master is first initialized with kubeadm init.
+
+ # Get the Cluster IP of the service
+service_ip=$(kubectl get service web -o jsonpath='{.spec.clusterIP}')
+# Use curl to send an HTTP request to the service
+curl $service_ip
+
+
+sudo docker run --rm \
+    -v '/snapshots:/snapshots' \
+    -v '/var/lib/etcd:/var/lib/etcd' \
+    -e ETCDCTL_API=3 \
+    'k8s.gcr.io/etcd-amd64:3.1.12' \
+    /bin/sh -c "etcdctl snapshot restore '/snapshots/backup.db' && mv /default.etcd/member /var/lib/etcd"
